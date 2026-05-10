@@ -8,3 +8,6 @@ INFO:     127.0.0.1:51985 - "GET /projects-page HTTP/1.1" 200 OK
 INFO:     127.0.0.1:63475 - "POST /projects/ HTTP/1.1" 200 OK
 INFO:     127.0.0.1:63475 - "GET /projects/ HTTP/1.1" 200 OK
 INFO:     127.0.0.1:63475 - "GET /projects-page HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59385 - "GET /tasks-page HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59385 - "GET /dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59385 - "GET /projects-page HTTP/1.1" 200 OK
