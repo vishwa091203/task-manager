@@ -4,7 +4,7 @@ A full-stack task management web application built with FastAPI, SQLite, SQLAlch
 
 ## Live Application URL
 
-Add live deployed URL here.
+https://task-manager-laae.onrender.com
 
 ## GitHub Repository
 
