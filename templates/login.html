@@ -1,49 +1,69 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width: 420px; margin: 60px auto;">
-    <div class="card">
-        <h2 style="margin-bottom: 20px; text-align: center;">Welcome Back</h2>
-        <div id="msg"></div>
-        <div id="login-form">
-            <label>Email</label>
-            <input type="email" id="email" placeholder="you@example.com">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••">
-            <button class="btn btn-primary" style="width:100%" onclick="login()">Login</button>
-            <p style="text-align:center; margin-top:15px; font-size:13px;">
-                No account? <a href="#" onclick="showSignup()">Sign up</a>
-            </p>
-        </div>
-        <div id="signup-form" style="display:none">
-            <label>Name</label>
-            <input type="text" id="s-name" placeholder="Your name">
-            <label>Email</label>
-            <input type="email" id="s-email" placeholder="you@example.com">
-            <label>Password</label>
-            <input type="password" id="s-password" placeholder="••••••••">
-            <button class="btn btn-primary" style="width:100%" onclick="signup()">Sign Up</button>
-            <p style="text-align:center; margin-top:15px; font-size:13px;">
-                Have account? <a href="#" onclick="showLogin()">Login</a>
-            </p>
+<section class="auth-layout">
+    <div class="auth-copy">
+        <p class="eyebrow">Focused work, clear ownership</p>
+        <h1>Plan projects and move tasks forward with less noise.</h1>
+        <p class="lede">A compact workspace for projects, task status, due dates, and team visibility.</p>
+        <div class="auth-points">
+            <span>Live dashboard</span>
+            <span>Project tracking</span>
+            <span>Role-based actions</span>
         </div>
     </div>
-</div>
+
+    <div class="glass-card auth-card">
+        <div class="form-header">
+            <p class="eyebrow">Welcome</p>
+            <h2 id="form-title">Sign in</h2>
+        </div>
+        <div id="msg"></div>
+
+        <div id="login-form" class="form-stack">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+            <button class="btn btn-primary" type="button" onclick="login()">Sign in</button>
+            <p class="switch-text">New here? <a href="#" onclick="showSignup(); return false;">Create account</a></p>
+        </div>
+
+        <div id="signup-form" class="form-stack is-hidden">
+            <label for="s-name">Name</label>
+            <input type="text" id="s-name" placeholder="Your name" autocomplete="name">
+            <label for="s-email">Email</label>
+            <input type="email" id="s-email" placeholder="you@example.com" autocomplete="email">
+            <label for="s-password">Password</label>
+            <input type="password" id="s-password" placeholder="Create a password" autocomplete="new-password">
+            <button class="btn btn-primary" type="button" onclick="signup()">Create account</button>
+            <p class="switch-text">Already have an account? <a href="#" onclick="showLogin(); return false;">Sign in</a></p>
+        </div>
+    </div>
+</section>
+
 <script>
     if (localStorage.getItem('token')) window.location.href = '/dashboard';
 
     function showMsg(text, type) {
-        document.getElementById('msg').innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+        document.getElementById('msg').innerHTML = '<div class="alert alert-' + type + '">' + escapeHtml(text) + '</div>';
     }
+
     function showSignup() {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('signup-form').style.display = 'block';
+        hideElement('login-form');
+        showElement('signup-form');
+        document.getElementById('form-title').textContent = 'Create account';
+        document.getElementById('msg').innerHTML = '';
     }
+
     function showLogin() {
-        document.getElementById('signup-form').style.display = 'none';
-        document.getElementById('login-form').style.display = 'block';
+        hideElement('signup-form');
+        showElement('login-form');
+        document.getElementById('form-title').textContent = 'Sign in';
+        document.getElementById('msg').innerHTML = '';
     }
+
     async function login() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const res = await fetch('/login', {
             method: 'POST',
@@ -56,12 +76,13 @@
             localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = '/dashboard';
         } else {
-            showMsg(data.detail, 'error');
+            showMsg(data.detail || 'Unable to sign in.', 'error');
         }
     }
+
     async function signup() {
-        const name = document.getElementById('s-name').value;
-        const email = document.getElementById('s-email').value;
+        const name = document.getElementById('s-name').value.trim();
+        const email = document.getElementById('s-email').value.trim();
         const password = document.getElementById('s-password').value;
         const res = await fetch('/signup', {
             method: 'POST',
@@ -74,7 +95,7 @@
             localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = '/dashboard';
         } else {
-            showMsg(data.detail, 'error');
+            showMsg(data.detail || 'Unable to create account.', 'error');
         }
     }
 </script>
