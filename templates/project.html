@@ -1,0 +1,43 @@
+{%extends "base.html"%}{%block content%}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<h2>Projects</h2>
+<button class="btn btn-primary" onclick="document.getElementById('create-form').style.display='block'">+ New Project</button>
+</div>
+<div class="card" id="create-form" style="display:none">
+<h3 style="margin-bottom:15px">Create Project</h3>
+<label>Project Name</label>
+<input type="text" id="p-name" placeholder="Project name">
+<label>Description</label>
+<textarea id="p-desc" rows="3" placeholder="Description"></textarea>
+<button class="btn btn-primary" onclick="createProject()">Create</button>
+</div>
+<div class="card">
+<table>
+<thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+<tbody id="projects-list"><tr><td colspan="3">Loading...</td></tr></tbody>
+</table>
+</div>
+<script>
+async function loadProjects() {
+const res = await fetch('/projects/', {headers: {'Authorization': 'Bearer ' + getToken()}});
+const data = await res.json();
+const tbody = document.getElementById('projects-list');
+if (!data.length) { tbody.innerHTML = '<tr><td colspan="3">No projects yet</td></tr>'; return; }
+tbody.innerHTML = data.map(function(p) {
+return '<tr><td><strong>' + p.name + '</strong></td><td>' + (p.description || '-') + '</td><td><a href="/tasks-page?project=' + p.id + '">View Tasks</a></td></tr>';
+}).join('');
+}
+async function createProject() {
+const name = document.getElementById('p-name').value;
+const description = document.getElementById('p-desc').value;
+const res = await fetch('/projects/', {
+method: 'POST',
+headers: {'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json'},
+body: JSON.stringify({name, description})
+});
+if (res.ok) { document.getElementById('create-form').style.display='none'; loadProjects(); }
+else { const d = await res.json(); alert(d.detail); }
+}
+loadProjects();
+</script>
+{%endblock%}

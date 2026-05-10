@@ -1,0 +1,33 @@
+{%extends "base.html"%}{%block content%}
+<h2 style="margin-bottom:20px">Dashboard</h2>
+<div class="stat-grid">
+<div class="stat-card"><h2 id="total" style="color:#4f46e5">0</h2><p>Total Tasks</p></div>
+<div class="stat-card"><h2 id="todo" style="color:#f59e0b">0</h2><p>To Do</p></div>
+<div class="stat-card"><h2 id="progress" style="color:#3b82f6">0</h2><p>In Progress</p></div>
+<div class="stat-card"><h2 id="done" style="color:#10b981">0</h2><p>Done</p></div>
+</div>
+<div class="card">
+<h3 style="margin-bottom:15px">Overview</h3>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Overdue Tasks</td><td><span id="overdue" class="badge badge-overdue">0</span></td></tr>
+<tr><td>Logged in as</td><td><span id="username">-</span></td></tr>
+<tr><td>Your Role</td><td><span id="role" class="badge badge-progress">-</span></td></tr>
+</table>
+</div>
+<script>
+async function loadDashboard() {
+const res = await fetch('/dashboard/', {headers: {'Authorization': 'Bearer ' + getToken()}});
+if (!res.ok) { logout(); return; }
+const data = await res.json();
+document.getElementById('total').textContent = data.total_tasks;
+document.getElementById('todo').textContent = data.todo;
+document.getElementById('progress').textContent = data.in_progress;
+document.getElementById('done').textContent = data.done;
+document.getElementById('overdue').textContent = data.overdue;
+document.getElementById('role').textContent = data.role;
+document.getElementById('username').textContent = data.user;
+}
+loadDashboard();
+</script>
+{%endblock%}

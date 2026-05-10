@@ -1,0 +1,67 @@
+{%extends "base.html"%}{%block content%}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<h2>Tasks</h2>
+<button class="btn btn-primary" onclick="document.getElementById('create-form').style.display='block'">+ New Task</button>
+</div>
+<div class="card" id="create-form" style="display:none">
+<h3 style="margin-bottom:15px">Create Task</h3>
+<label>Title</label>
+<input type="text" id="t-title" placeholder="Task title">
+<label>Description</label>
+<textarea id="t-desc" rows="2" placeholder="Description"></textarea>
+<label>Project</label>
+<select id="t-project"></select>
+<label>Due Date</label>
+<input type="datetime-local" id="t-due">
+<button class="btn btn-primary" onclick="createTask()">Create Task</button>
+</div>
+<div class="card">
+<table>
+<thead><tr><th>Title</th><th>Project</th><th>Assignee</th><th>Status</th><th>Due</th><th>Change Status</th></tr></thead>
+<tbody id="tasks-list"><tr><td colspan="6">Loading...</td></tr></tbody>
+</table>
+</div>
+<script>
+async function loadData() {
+const token = getToken();
+const headers = {'Authorization': 'Bearer ' + token};
+const pr = await fetch('/projects/', {headers: headers}).then(function(r){ return r.json(); });
+const tk = await fetch('/tasks/', {headers: headers}).then(function(r){ return r.json(); });
+document.getElementById('t-project').innerHTML = pr.map(function(p){
+return '<option value="' + p.id + '">' + p.name + '</option>';
+}).join('');
+const tbody = document.getElementById('tasks-list');
+if (!tk.length) { tbody.innerHTML = '<tr><td colspan="6">No tasks yet</td></tr>'; return; }
+tbody.innerHTML = tk.map(function(t) {
+const badge = t.status === 'todo' ? 'badge-todo' : t.status === 'in_progress' ? 'badge-progress' : 'badge-done';
+const label = t.status === 'in_progress' ? 'In Progress' : t.status === 'todo' ? 'To Do' : 'Done';
+const due = t.due_date ? new Date(t.due_date).toLocaleDateString() : '-';
+return '<tr><td><strong>' + t.title + '</strong><br><small style="color:#888">' + (t.description || '') + '</small></td><td>' + t.project_id + '</td><td>' + (t.assignee_id || 'Unassigned') + '</td><td><span class="badge ' + badge + '">' + label + '</span></td><td>' + due + '</td><td><select onchange="updateStatus(' + t.id + ', this.value)" style="width:auto;margin:0;padding:5px"><option value="todo"' + (t.status==='todo'?' selected':'') + '>To Do</option><option value="in_progress"' + (t.status==='in_progress'?' selected':'') + '>In Progress</option><option value="done"' + (t.status==='done'?' selected':'') + '>Done</option></select></td></tr>';
+}).join('');
+}
+async function createTask() {
+const body = {
+title: document.getElementById('t-title').value,
+description: document.getElementById('t-desc').value,
+project_id: parseInt(document.getElementById('t-project').value),
+due_date: document.getElementById('t-due').value || null
+};
+const res = await fetch('/tasks/', {
+method: 'POST',
+headers: {'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json'},
+body: JSON.stringify(body)
+});
+if (res.ok) { document.getElementById('create-form').style.display='none'; loadData(); }
+else { const d = await res.json(); alert(d.detail); }
+}
+async function updateStatus(taskId, status) {
+await fetch('/tasks/' + taskId, {
+method: 'PATCH',
+headers: {'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json'},
+body: JSON.stringify({status: status})
+});
+loadData();
+}
+loadData();
+</script>
+{%endblock%}
